@@ -203,6 +203,12 @@ io.on('connection', socket => {
     }
   });
 });
+const uploadDir = './uploads';
+
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+  console.log('Created uploads directory');
+}
 
 server.listen(PORT, () => {
   console.log(`Server đang chạy trên http://localhost:${PORT}`);
