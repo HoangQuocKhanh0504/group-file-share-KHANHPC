@@ -145,89 +145,107 @@ socket.on('join-error', (msg) => {
 });
 
 // Upload file
-function showLoading() {
-  uploadFileBtn.disabled = true;
-  uploadFileBtn.textContent = 'Đang gửi... ⏳';
-  uploadProgress.textContent = '';
+uploadFileBtn.onclick = async () => {
   uploadMsg.textContent = '';
-}
-
-function hideLoading() {
-  uploadFileBtn.disabled = false;
-  uploadFileBtn.textContent = 'Gửi file';
-}
-
-// Hàm upload file chunk (theo chunk lớn 512KB và gửi song song 3 chunk)
-// Bạn có thể thay thế hoặc sửa lại nếu đã có sẵn hàm upload của bạn
-function uploadFile(file) {
-  const chunkSize = 512 * 1024; // 512KB
-  const totalChunks = Math.ceil(file.size / chunkSize);
-  let chunkIndex = 0;
-  const concurrency = 3;
-  let activeUploads = 0;
-
-  showLoading();
-
-  function sendChunk(index) {
-    if (index >= totalChunks) return;
-    activeUploads++;
-
-    const start = index * chunkSize;
-    const end = Math.min(start + chunkSize, file.size);
-    const chunk = file.slice(start, end);
-
-    const reader = new FileReader();
-    reader.onload = e => {
-      const arrayBuffer = e.target.result;
-      socket.emit('upload-chunk', {
-        data: arrayBuffer,
-        fileName: file.name,
-        totalSize: file.size,
-        chunkIndex: index,
-        totalChunks,
-      });
-
-      activeUploads--;
-      uploadProgress.textContent = `Đã gửi chunk ${index + 1} / ${totalChunks}`;
-
-      // Nếu còn chunk chưa gửi thì gửi tiếp
-      if (chunkIndex < totalChunks) {
-        sendChunk(chunkIndex++);
-      }
-
-      // Nếu tất cả chunk đã gửi và không còn active uploads
-      if (chunkIndex >= totalChunks && activeUploads === 0) {
-        uploadProgress.textContent = 'Đang hoàn tất upload...';
-      }
-    };
-    reader.readAsArrayBuffer(chunk);
-  }
-
-  // Bắt đầu gửi concurrency chunk đầu tiên
-  for (; chunkIndex < concurrency && chunkIndex < totalChunks; chunkIndex++) {
-    sendChunk(chunkIndex);
-  }
-}
-
-// Xử lý nút bấm gửi file
-uploadFileBtn.addEventListener('click', () => {
   if (!fileInput.files.length) {
+    uploadMsg.textContent = 'Vui lòng chọn file để gửi';
+    return;
+  }
+  const file = fileInput.files[0];
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const res = await fetch(`/upload/${currentGroupCode}/${currentMemberName}`, {
+      method: 'POST',
+      body: formData,
+    });
+    const data = await res.json();
+    if (data.error) {
+      uploadMsg.textContent = data.error;
+    } else {
+      uploadMsg.style.color = 'green';
+      uploadMsg.textContent = 'Gửi file thành công';
+      fileInput.value = '';
+    }
+  } catch (err) {
+    uploadMsg.textContent = 'Lỗi gửi file';
+  }
+};
+
+// Rời nhóm
+leaveGroupBtn.onclick = () => {
+  if (!currentGroupCode || !currentMemberName) return;
+
+  socket.emit('leave-group', { memberName: currentMemberName, groupCode: currentGroupCode });
+
+  // Reset UI
+  currentGroupCode = null;
+  currentGroupName = null;
+  currentMemberName = null;
+
+  groupArea.classList.add('hidden');
+  joinGroupDiv.classList.remove('hidden');
+  createGroupDiv.classList.remove('hidden');
+
+  logList.innerHTML = '';
+  filesList.innerHTML = '';
+  membersList.innerHTML = '';
+  memberCountSpan.textContent = '0';
+
+  memberNameInput.value = '';
+  joinGroupCodeInput.value = '';
+  uploadMsg.textContent = '';
+};
+
+
+uploadBtn.addEventListener('click', () => {
+  const file = fileInput.files[0];
+  if (!file) {
     uploadMsg.textContent = 'Vui lòng chọn file trước khi gửi.';
+    uploadProgress.textContent = '';
     return;
   }
   uploadMsg.textContent = '';
-  uploadProgress.textContent = '';
-  uploadFile(fileInput.files[0]);
-});
+  uploadProgress.textContent = 'Đang chuẩn bị gửi...';
 
-// Lắng nghe sự kiện upload-complete từ server để ẩn loading
-socket.on('upload-complete', (fileName) => {
-  uploadProgress.textContent = `Upload file "${fileName}" thành công! 🎉`;
-  hideLoading();
-});
+  const chunkSize = 100000 * 1024; // 64KB mỗi lần gửi
+  const totalSize = file.size;
+  let offset = 0;
 
-// Lắng nghe sự kiện lỗi upload
-socket.on('upload-error', (msg) => {
-  uploadMsg.textContent = `Lỗi khi upload: ${msg}`;
-  hideLoading();
+  const reader = new FileReader();
+
+  reader.onload = e => {
+    // Gửi chunk qua socket
+    socket.emit('upload-chunk', { 
+      data: e.target.result, 
+      fileName: file.name,
+      totalSize: totalSize,
+      offset: offset
+    });
+
+    offset += e.target.result.byteLength;
+
+    // Cập nhật tiến trình gửi file
+    uploadProgress.textContent = `Đang gửi file: ${offset.toLocaleString()}/${totalSize.toLocaleString()} byte`;
+
+    if (offset < totalSize) {
+      readSlice(offset);
+    } else {
+      uploadProgress.textContent = `Gửi file hoàn tất: ${totalSize.toLocaleString()} byte`;
+    }
+  };
+
+  reader.onerror = () => {
+    uploadMsg.textContent = 'Lỗi khi đọc file.';
+    uploadProgress.textContent = '';
+  };
+
+  function readSlice(o) {
+    const slice = file.slice(o, o + chunkSize);
+    reader.readAsArrayBuffer(slice);
+  }
+
+  readSlice(0);
 });
