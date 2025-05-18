@@ -11,11 +11,17 @@ const io = new Server(server);
 
 const PORT = 3000;
 
-// Lưu file upload vào folder 'uploads' với tên ngẫu nhiên (để tránh trùng)
+// Lưu file upload vào folder 'uploads/<groupCode>' với tên ngẫu nhiên (để tránh trùng)
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, 'uploads/'),
+  destination: (req, file, cb) => {
+    const groupCode = req.params.groupCode; // lấy groupCode từ params upload
+    const dir = path.join('uploads', groupCode);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    cb(null, dir);
+  },
   filename: (req, file, cb) => {
-    // lưu tên file theo timestamp + gốc để không trùng
     const uniqueName = Date.now() + '-' + file.originalname;
     cb(null, uniqueName);
   },
@@ -28,6 +34,23 @@ app.use(express.json());
 // Dữ liệu nhóm
 // Cấu trúc: { groupCode: { name, maxMembers, members: [{name, id}], files: [{filename, storedName, size, uploader, time}], logs: [] } }
 const groups = {};
+
+// Hàm xóa nhóm và thư mục upload
+function deleteGroup(groupCode) {
+  const group = groups[groupCode];
+  if (!group) return;
+
+  // Xóa folder uploads/groupCode
+  const dir = path.join(__dirname, 'uploads', groupCode);
+  if (fs.existsSync(dir)) {
+    fs.rmSync(dir, { recursive: true, force: true });
+    console.log(`Deleted uploads folder for group ${groupCode}`);
+  }
+
+  // Xóa nhóm khỏi groups
+  delete groups[groupCode];
+  console.log(`Group ${groupCode} deleted`);
+}
 
 // Tạo nhóm
 app.post('/create-group', (req, res) => {
@@ -61,7 +84,6 @@ app.post('/join-group', (req, res) => {
   if (group.members.length >= group.maxMembers) {
     return res.status(400).json({ error: 'Nhóm đã đủ thành viên' });
   }
-  // Kiểm tra trùng tên thành viên
   if (group.members.find(m => m.name === memberName)) {
     return res.status(400).json({ error: 'Tên thành viên đã tồn tại trong nhóm' });
   }
@@ -73,7 +95,6 @@ app.post('/upload/:groupCode/:memberName', upload.single('file'), (req, res) => 
   const { groupCode, memberName } = req.params;
   const group = groups[groupCode];
   if (!group) {
-    // Xóa file vừa upload nếu nhóm ko tồn tại
     if (req.file) fs.unlinkSync(req.file.path);
     return res.status(404).json({ error: 'Nhóm không tồn tại' });
   }
@@ -111,7 +132,7 @@ app.get('/download/:groupCode/:storedName', (req, res) => {
   const file = group.files.find(f => f.storedName === storedName);
   if (!file) return res.status(404).send('File không tồn tại trong nhóm');
 
-  const filePath = path.join(__dirname, 'uploads', storedName);
+  const filePath = path.join(__dirname, 'uploads', groupCode, storedName);
   if (!fs.existsSync(filePath)) return res.status(404).send('File không tồn tại trên server');
 
   res.download(filePath, file.filename);
@@ -154,7 +175,6 @@ io.on('connection', (socket) => {
     const group = groups[groupCode];
     if (!group) return;
 
-    // Xóa member khỏi nhóm
     group.members = group.members.filter(m => m.name !== memberName);
     socket.leave(groupCode);
 
@@ -165,10 +185,14 @@ io.on('connection', (socket) => {
       files: group.files,
       members: group.members.map(m => m.name),
     });
+
+    // Nếu nhóm trống thì xóa nhóm
+    if (group.members.length === 0) {
+      deleteGroup(groupCode);
+    }
   });
 
   socket.on('disconnect', () => {
-    // Tìm và xóa thành viên khỏi nhóm khi mất kết nối
     for (const [groupCode, group] of Object.entries(groups)) {
       const member = group.members.find(m => m.id === socket.id);
       if (member) {
@@ -180,10 +204,16 @@ io.on('connection', (socket) => {
           files: group.files,
           members: group.members.map(m => m.name),
         });
+
+        // Nếu nhóm trống thì xóa nhóm
+        if (group.members.length === 0) {
+          deleteGroup(groupCode);
+        }
       }
     }
   });
 });
+
 io.on('connection', socket => {
   let writeStream = null;
   let currentFileName = '';
@@ -203,6 +233,7 @@ io.on('connection', socket => {
     }
   });
 });
+
 const uploadDir = './uploads';
 
 if (!fs.existsSync(uploadDir)) {
