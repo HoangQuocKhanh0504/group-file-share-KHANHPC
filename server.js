@@ -1,0 +1,209 @@
+const express = require('express');
+const http = require('http');
+const path = require('path');
+const multer = require('multer');
+const { Server } = require('socket.io');
+const fs = require('fs');
+
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
+
+const PORT = 3000;
+
+// Lưu file upload vào folder 'uploads' với tên ngẫu nhiên (để tránh trùng)
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, 'uploads/'),
+  filename: (req, file, cb) => {
+    // lưu tên file theo timestamp + gốc để không trùng
+    const uniqueName = Date.now() + '-' + file.originalname;
+    cb(null, uniqueName);
+  },
+});
+const upload = multer({ storage });
+
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json());
+
+// Dữ liệu nhóm
+// Cấu trúc: { groupCode: { name, maxMembers, members: [{name, id}], files: [{filename, storedName, size, uploader, time}], logs: [] } }
+const groups = {};
+
+// Tạo nhóm
+app.post('/create-group', (req, res) => {
+  const { groupName, groupCode, maxMembers } = req.body;
+  if (!groupName || !groupCode || !maxMembers) {
+    return res.status(400).json({ error: 'Thiếu thông tin nhóm' });
+  }
+  if (groups[groupCode]) {
+    return res.status(400).json({ error: 'Mã nhóm đã tồn tại' });
+  }
+  groups[groupCode] = {
+    name: groupName,
+    maxMembers: parseInt(maxMembers),
+    members: [],
+    files: [],
+    logs: [],
+  };
+  res.json({ success: true });
+});
+
+// Tham gia nhóm
+app.post('/join-group', (req, res) => {
+  const { memberName, groupCode } = req.body;
+  if (!memberName || !groupCode) {
+    return res.status(400).json({ error: 'Thiếu thông tin' });
+  }
+  const group = groups[groupCode];
+  if (!group) {
+    return res.status(404).json({ error: 'Nhóm không tồn tại' });
+  }
+  if (group.members.length >= group.maxMembers) {
+    return res.status(400).json({ error: 'Nhóm đã đủ thành viên' });
+  }
+  // Kiểm tra trùng tên thành viên
+  if (group.members.find(m => m.name === memberName)) {
+    return res.status(400).json({ error: 'Tên thành viên đã tồn tại trong nhóm' });
+  }
+  res.json({ success: true, groupName: group.name, maxMembers: group.maxMembers });
+});
+
+// Upload file lên nhóm (multipart/form-data)
+app.post('/upload/:groupCode/:memberName', upload.single('file'), (req, res) => {
+  const { groupCode, memberName } = req.params;
+  const group = groups[groupCode];
+  if (!group) {
+    // Xóa file vừa upload nếu nhóm ko tồn tại
+    if (req.file) fs.unlinkSync(req.file.path);
+    return res.status(404).json({ error: 'Nhóm không tồn tại' });
+  }
+  if (!req.file) return res.status(400).json({ error: 'Không có file upload' });
+
+  const fileData = {
+    filename: req.file.originalname,
+    storedName: req.file.filename,
+    size: req.file.size,
+    uploader: memberName,
+    time: Date.now(),
+  };
+
+  group.files.push(fileData);
+
+  // Thêm log
+  const logMsg = `${memberName} đã gửi file ${fileData.filename} (${fileData.size} bytes)`;
+  group.logs.push({ time: Date.now(), message: logMsg });
+
+  // Phát sự kiện đến nhóm qua Socket.io
+  io.to(groupCode).emit('group-log', {
+    logs: group.logs,
+    files: group.files,
+  });
+
+  res.json({ success: true });
+});
+
+// Download file theo groupCode và storedName
+app.get('/download/:groupCode/:storedName', (req, res) => {
+  const { groupCode, storedName } = req.params;
+  const group = groups[groupCode];
+  if (!group) return res.status(404).send('Nhóm không tồn tại');
+
+  const file = group.files.find(f => f.storedName === storedName);
+  if (!file) return res.status(404).send('File không tồn tại trong nhóm');
+
+  const filePath = path.join(__dirname, 'uploads', storedName);
+  if (!fs.existsSync(filePath)) return res.status(404).send('File không tồn tại trên server');
+
+  res.download(filePath, file.filename);
+});
+
+// Socket.io xử lý join/leave nhóm và nhật ký
+io.on('connection', (socket) => {
+  console.log('User connected:', socket.id);
+
+  socket.on('join-group', ({ memberName, groupCode }) => {
+    const group = groups[groupCode];
+    if (!group) {
+      socket.emit('join-error', 'Nhóm không tồn tại');
+      return;
+    }
+    if (group.members.length >= group.maxMembers) {
+      socket.emit('join-error', 'Nhóm đã đầy');
+      return;
+    }
+    if (group.members.find(m => m.name === memberName)) {
+      socket.emit('join-error', 'Tên thành viên đã tồn tại');
+      return;
+    }
+
+    // Thêm member
+    group.members.push({ name: memberName, id: socket.id });
+    socket.join(groupCode);
+
+    // Log sự kiện
+    const msg = `${memberName} đã vào nhóm`;
+    group.logs.push({ time: Date.now(), message: msg });
+    io.to(groupCode).emit('group-log', {
+      logs: group.logs,
+      files: group.files,
+      members: group.members.map(m => m.name),
+    });
+  });
+
+  socket.on('leave-group', ({ memberName, groupCode }) => {
+    const group = groups[groupCode];
+    if (!group) return;
+
+    // Xóa member khỏi nhóm
+    group.members = group.members.filter(m => m.name !== memberName);
+    socket.leave(groupCode);
+
+    const msg = `${memberName} đã rời nhóm`;
+    group.logs.push({ time: Date.now(), message: msg });
+    io.to(groupCode).emit('group-log', {
+      logs: group.logs,
+      files: group.files,
+      members: group.members.map(m => m.name),
+    });
+  });
+
+  socket.on('disconnect', () => {
+    // Tìm và xóa thành viên khỏi nhóm khi mất kết nối
+    for (const [groupCode, group] of Object.entries(groups)) {
+      const member = group.members.find(m => m.id === socket.id);
+      if (member) {
+        group.members = group.members.filter(m => m.id !== socket.id);
+        const msg = `${member.name} đã rời nhóm (mất kết nối)`;
+        group.logs.push({ time: Date.now(), message: msg });
+        io.to(groupCode).emit('group-log', {
+          logs: group.logs,
+          files: group.files,
+          members: group.members.map(m => m.name),
+        });
+      }
+    }
+  });
+});
+io.on('connection', socket => {
+  let writeStream = null;
+  let currentFileName = '';
+
+  socket.on('upload-chunk', ({ data, fileName, totalSize, offset }) => {
+    if (!writeStream) {
+      currentFileName = fileName;
+      writeStream = fs.createWriteStream(path.join(__dirname, 'uploads', currentFileName));
+    }
+    const buffer = Buffer.from(new Uint8Array(data));
+    writeStream.write(buffer);
+
+    if (offset + buffer.length >= totalSize) {
+      writeStream.end();
+      writeStream = null;
+      socket.emit('upload-complete', currentFileName);
+    }
+  });
+});
+
+server.listen(PORT, () => {
+  console.log(`Server đang chạy trên http://localhost:${PORT}`);
+});
