@@ -210,7 +210,7 @@ uploadBtn.addEventListener('click', () => {
   uploadMsg.textContent = '';
   uploadProgress.textContent = 'Đang chuẩn bị gửi...';
 
-  const chunkSize = 100 * 1024; // 64KB mỗi lần gửi
+  const chunkSize = 1000 * 1024; // 64KB mỗi lần gửi
   const totalSize = file.size;
   let offset = 0;
 
