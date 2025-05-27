@@ -125,10 +125,10 @@
   <h1>CHIA SẺ FILE TỐC ĐỘ CAO KHANHPC</h1>
 
   <div id="create-group-div">
-    <h3>Tạo nhóm mới</h3>
-    <input id="group-name" placeholder="Tên nhóm" />
-    <input id="group-code" placeholder="Mã nhóm (unique)" />
-    <input id="max-members" placeholder="Giới hạn thành viên" type="number" />
+    <h3>Tạo nhóm mới (Chỉ dành cho giáo viên)</h3>
+    <input id="group-name" placeholder="Tên nhóm" autocomplete="off"/>
+    <input id="group-code" placeholder="Mã nhóm (tùy chỉnh)" autocomplete="off"/>
+    <input id="max-members" placeholder="Giới hạn thành viên" type="number" autocomplete="off"/>
     <button id="create-group-btn">Tạo nhóm</button>
     <div id="create-group-msg"></div>
   </div>
@@ -137,8 +137,8 @@
 
   <div id="join-group-div">
     <h3>Tham gia nhóm</h3>
-    <input id="member-name" placeholder="Tên thành viên" />
-    <input id="join-group-code" placeholder="Mã nhóm" />
+    <input id="member-name" placeholder="Tên thành viên" autocomplete="off"/>
+    <input id="join-group-code" placeholder="Mã nhóm" autocomplete="off"/>
     <button id="join-group-btn">Tham gia</button>
     <div id="join-group-msg"></div>
   </div>
