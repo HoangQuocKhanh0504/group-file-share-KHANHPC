@@ -2,191 +2,913 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nhóm & Chia sẻ File KHANHPC</title>
   <link rel="icon" type="image/png" href="GD.png">
-<style>
-  body { 
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-    margin: 20px auto;
-    max-width: 600px;
-    background: #f0f4ff;
-    color: #222;
-    line-height: 1.5;
-  }
-  h1, h2, h3 {
-    font-weight: 700;
-    color: #0d47a1;
-  }
-  h1 {
-    margin-bottom: 24px;
-    text-align: center;
-  }
-  .hidden { display: none; }
-  ul { 
-    padding-left: 20px; 
-    margin-top: 6px;
-  }
-  a { 
-    color: #0d47a1; 
-    text-decoration: underline; 
-    cursor: pointer; 
-  }
-
-  /* Input style */
-  input {
-    width: 100%;
-    padding: 12px 16px;
-    margin-bottom: 16px;
-    font-size: 16px;
-    border: 1.5px solid #a6bbe9;
-    border-radius: 10px;
-    box-sizing: border-box;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    outline: none;
-    background-color: #fff;
-  }
-  input:focus {
-    border-color: #1976d2;
-    box-shadow: 0 0 8px rgba(25, 118, 210, 0.6);
-  }
-
-  /* Button style */
-  button {
-    width: 100%;
-    padding: 12px 0;
-    font-size: 17px;
-    font-weight: 700;
-    border-radius: 10px;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    box-shadow: 0 2px 6px rgba(25, 118, 210, 0.3);
-  }
-
-  #create-group-btn, #join-group-btn, #upload-file-btn {
-    background-color: #1976d2;
-    color: white;
-  }
-  #create-group-btn:hover, #join-group-btn:hover, #upload-file-btn:hover {
-    background-color: #0d47a1;
-  }
-
-  #leave-group-btn {
-    background-color: #d32f2f;
-    color: white;
-    margin-top: 28px;
-    width: auto;
-    padding: 10px 20px;
-    box-shadow: 0 2px 6px rgba(211, 47, 47, 0.4);
-  }
-  #leave-group-btn:hover {
-    background-color: #9a0007;
-  }
-
-  /* Message styles */
-#create-group-msg, #join-group-msg, #upload-msg {
-  color: #d32f2f;
-  font-weight: 700;
-  min-height: 28px;  /* Tăng chiều cao để luôn giữ chỗ */
-  margin-top: 6px;   /* Khoảng cách trên so với input/nút */
-  margin-bottom: 14px; /* Khoảng cách dưới so với nút */
-  text-align: center;
-  display: block;    /* Đảm bảo nó là block element */
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 20px auto;
+      max-width: 600px;
+      background: #f0f4ff;
+      color: #222;
+      line-height: 1.5;
+    }
+    h1, h2, h3 {
+      font-weight: 700;
+      color: #0d47a1;
+    }
+    h1 {
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    .hidden { display: none; }
+    ul {
+      padding-left: 20px;
+      margin-top: 6px;
+    }
+    a {
+      color: #0d47a1;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    .input {
+      width: 100%;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      font-size: 16px;
+      border: 1.5px solid #a6bbe9;
+      border-radius: 10px;
+      box-sizing: border-box;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      outline: none;
+      background-color: #fff;
+    }
+    input:focus {
+      border-color: #1976d2;
+      box-shadow: 0 0 8px rgba(25, 118, 210, 0.6);
+    }
+    .button {
+      width: 100%;
+      padding: 12px 0;
+      font-size: 17px;
+      font-weight: 700;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      box-shadow: 0 2px 6px rgba(25, 118, 210, 0.3);
+    }
+    #create-group-btn, #join-group-btn, #upload-file-btn {
+      background-color: #1976d2;
+      color: white;
+    }
+    #create-group-btn:hover, #join-group-btn:hover, #upload-file-btn:hover {
+      background-color: #0d47a1;
+    }
+    #leave-group-btn {
+      background-color: #d32f2f;
+      color: white;
+      margin-top: 28px;
+      width: auto;
+      padding: 10px 20px;
+      box-shadow: 0 2px 6px rgba(211, 47, 47, 0.4);
+    }
+    #leave-group-btn:hover {
+      background-color: #9a0007;
+    }
+    #create-group-msg, #join-group-msg, #upload-msg {
+      color: #d32f2f;
+      font-weight: 700;
+      min-height: 28px;
+      margin-top: 6px;
+      margin-bottom: 14px;
+      text-align: center;
+      display: block;
+    }
+    #upload-progress {
+      margin-top: 8px;
+      font-weight: 700;
+      color: #1565c0;
+      text-align: center;
+      font-size: 15px;
+      min-height: 24px;
+    }
+    #group-area h2, #group-area h3 {
+      margin-bottom: 8px;
+    }
+    #members-list, #log-list, #files-list {
+      max-height: 180px;
+      overflow-y: auto;
+      border: 1px solid #bbb;
+      background-color: #fff;
+      border-radius: 8px;
+      padding: 12px 16px;
+    }
+    .chat-container {
+  max-width: 600px;
+  /* margin: 40px auto; */ /* Bỏ dòng này để sát mép trên */
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  height: 90vh;
+  overflow: hidden;
+  border: 1px solid #ddd;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 400px;
+  overflow: auto;
+  background: #f0f0f0;
+  display: none;
+  height: auto;
 }
-
-  /* Upload progress */
-  #upload-progress {
-    margin-top: 8px;
-    font-weight: 700;
-    color: #1565c0;
-    text-align: center;
-    font-size: 15px;
-    min-height: 24px;
+#pinned-message-container {
+  border-bottom: 1px solid #eee;
+  background: #fff8dc;
+  padding: 12px 20px;
+  font-style: italic;
+  position: relative;
+  display: none;
+  font-weight: 600;
+  color: #b58900;
+  box-shadow: inset 0 -2px 3px rgba(0,0,0,0.05);
+}
+#pinned-message-container .close-pin {
+  position: absolute;
+  right: 15px;
+  top: 15px;
+  cursor: pointer;
+  font-weight: bold;
+  color: #b58900;
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  transition: color 0.3s ease;
+}
+#pinned-message-container .close-pin:hover {
+  color: #8b6f00;
+}
+#messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 25px;
+  background: #fafafa;
+  scroll-behavior: smooth;
+}
+.message {
+  display: flex;
+  margin-bottom: 15px;
+  position: relative;
+  flex-direction: row; /* đảm bảo avatar bên trái, bubble bên phải */
+  align-items: flex-end; /* canh thấp để avatar và bubble cùng chân */
+}
+.message.highlight {
+  background-color: #fffbdd;
+  border-radius: 10px;
+  padding: 5px 10px;
+}
+.message.right {
+  flex-direction: row-reverse; /* avatar bên phải, bubble bên trái */
+  align-items: flex-end;
+}
+.message .bubble {
+    margin-left: 15px; /* cách avatar 1 khoảng bên trái */
+  margin-right: 0;
+  display: inline-block;    /* cho phép chiều rộng theo nội dung */
+  min-width: 60px;          /* chiều rộng tối thiểu, bạn có thể điều chỉnh */
+  max-width: 75%;           /* giữ chiều rộng tối đa như hiện tại */
+  padding: 12px 18px;
+  border-radius: 20px;
+  background-color: #e0e3e7;
+  position: relative;
+  margin: 0 15px;
+  word-wrap: break-word;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.07);
+  white-space: pre-wrap;
+  font-size: 15px;
+  line-height: 1.4;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+.message.right .bubble {
+    margin-right: 15px; /* cách avatar 1 khoảng bên phải */
+  margin-left: 0;
+  background-color: #2e86ff;
+  color: white;
+  box-shadow: 0 3px 8px rgba(46,134,255,0.4);
+}
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  transition: border-color 0.3s ease;
+  object-fit: cover;
+}
+.message.right .avatar {
+  border-color: #2e86ff;
+}
+.user-info {
+  font-size: 12px;
+  color: #777;
+  margin-bottom: 6px;
+  font-weight: 600;
+  user-select: none;
+}
+.reply-quote {
+  background-color: rgba(46, 134, 255, 0.1);
+  padding: 7px 10px;
+  margin-bottom: 10px;
+  border-left: 4px solid #2e86ff;
+  font-size: 13px;
+  color: #1a4bb8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+.reply-quote:hover {
+  background-color: rgba(46, 134, 255, 0.15);
+}
+.menu-btn {
+  position: absolute;
+  top: 50%;
+  /* Thay vì right: -38px cố định, dùng right: 8px để gần bong bóng */
+  right: auto;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 22px;
+  color: #666;
+  z-index: 1;
+  padding: 0;
+  transition: color 0.3s ease;
+}
+.message.right .menu-btn {
+  top: 50%;
+  left: auto;
+  right: auto;
+}
+.menu-btn:hover {
+  color: #2e86ff;
+}
+.message.right .menu-btn {
+  left: -38px;
+  right: auto;
+}
+.menu-options {
+  position: absolute;
+  top: auto;
+  right: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  display: none;
+  flex-direction: column;
+  min-width: 110px;
+  z-index: 20;
+  font-size: 14px;
+}
+.menu-options button {
+  padding: 10px 15px;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  font-weight: 600;
+  color: #444;
+  transition: background-color 0.2s ease;
+  border-radius: 6px;
+}
+.menu-options button:hover {
+  background-color: #f0f4ff;
+  color: #2e86ff;
+}
+#input-form {
+  display: flex;
+  border-top: 1px solid #ddd;
+  padding: 12px 15px;
+  background: #fff;
+  align-items: center;
+  box-shadow: 0 -3px 10px rgba(0,0,0,0.05);
+}
+#input {
+  flex: 1;
+  padding: 12px 18px;
+  border: 1px solid #ccc;
+  border-radius: 25px;
+  outline: none;
+  font-size: 15px;
+  transition: border-color 0.3s ease;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+}
+#input:focus {
+  border-color: #2e86ff;
+  box-shadow: 0 0 8px rgba(46,134,255,0.3);
+}
+#input-form button {
+  margin-left: 12px;
+  padding: 12px 25px;
+  border: none;
+  background-color: #2e86ff;
+  color: white;
+  font-weight: 700;
+  font-size: 16px;
+  border-radius: 25px;
+  cursor: pointer;
+  box-shadow: 0 5px 12px rgba(46,134,255,0.5);
+  transition: background-color 0.3s ease;
+}
+#input-form button:hover {
+  background-color: #1b5fc4;
+}
+#reply-info {
+  font-size: 14px;
+  color: #2e86ff;
+  background: #dbe9ff;
+  border-radius: 20px;
+  padding: 6px 14px;
+  margin-right: 15px;
+  max-width: 280px;
+  cursor: pointer;
+  user-select: none;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(46,134,255,0.3);
+  transition: background-color 0.3s ease;
+}
+#reply-info:hover {
+  background-color: #bed1ff;
+}
+#login-btn, #logout-btn {
+  margin: 20px auto;
+  padding: 12px 30px;
+  border: none;
+  background-color: #2e86ff;
+  color: white;
+  font-weight: 700;
+  font-size: 16px;
+  border-radius: 30px;
+  cursor: pointer;
+  display: block;
+  box-shadow: 0 6px 16px rgba(46,134,255,0.5);
+  transition: background-color 0.3s ease;
+}
+#login-btn:hover, #logout-btn:hover {
+  background-color: #1b5fc4;
+}
+* {
+  scrollbar-width: none;         /* Firefox */
+  -ms-overflow-style: none;      /* IE/Edge */
+}
+*::-webkit-scrollbar {
+  display: none;                 /* Chrome/Safari */
+}
+html, body {
+  overflow: auto;                /* vẫn cho phép cuộn */
+}
+html, body {
+  overflow: scroll;              /* hoặc auto */
+  scrollbar-width: none;         /* Firefox */
+  -ms-overflow-style: none;      /* IE/Edge */
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;                 /* Chrome/Safari */
+}
+@media (max-width: 600px) {
+  .chat-container {
+    border-radius: 0;
+    box-shadow: none;
   }
-
-  /* Group info */
-  #group-area h2, #group-area h3 {
-    margin-bottom: 8px;
+  .message .bubble {
+    max-width: 100%;
+    padding: 10px 14px;
   }
-
-  #members-list, #log-list, #files-list {
-    max-height: 180px;
-    overflow-y: auto;
-    border: 1px solid #bbb;
-    background-color: #fff;
-    border-radius: 8px;
-    padding: 12px 16px;
+  .avatar {
+    width: 32px;
+    height: 32px;
+  }
+  .menu-btn {
+    font-size: 18px;
+  }
+  .menu-options {
+    min-width: 100px;
+  }
+}
+  </style>
+<style>
+  #scroll-to-bottom-btn {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    background-color: rgb(24, 132, 218);
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    display: none;
+    z-index: 10;
+    opacity: 0.9;
+    transition: background-color 0.3s ease;
+    position: relative;
+    left: 160px;
+    top: -170px;
+  }
+  #scroll-to-bottom-btn:hover {
+    background-color: #0056b3;
   }
 </style>
-
+<style>
+@keyframes scroll-infinite {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-25%);
+  }
+}
+</style>
 </head>
+<div id="notification-bar" style="
+    width: 100%;
+    background-color: #ffcc00;
+    color: #000;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    height: 40px;
+    line-height: 40px;
+    border-bottom: 2px solid #cc9900;
+    box-sizing: border-box;
+    position: relative;
+">
+  <div id="scrolling-wrapper" style="
+      display: inline-block;
+      white-space: nowrap;
+      will-change: transform;
+      animation: scroll-infinite 30s linear infinite;
+  ">
+    <span style="padding-right: 50px;">
+      Hiện tại web chỉ mới đang phát triển nên sẽ có 1 số lỗi không mong muốn.Đôi khi css của web sẽ bị mất. Nếu các bạn muốn làm web thì có thể liên hệ mình qua website: 
+      <a href="https://aikhanh.onrender.com" target="_blank" style="color: #000; text-decoration: underline;">https://aikhanh.onrender.com</a>
+       © KHANHPC 2025| mọi quyền được bảo lưu
+    </span>
+    <span style="padding-right: 50px;">
+      Hiện tại web chỉ mới đang phát triển nên sẽ có 1 số lỗi không mong muốn.Đôi khi css của web sẽ bị mất. Nếu các bạn muốn làm web thì có thể liên hệ mình qua website: 
+      <a href="https://aikhanh.onrender.com" target="_blank" style="color: #000; text-decoration: underline;">https://aikhanh.onrender.com</a>
+       © KHANHPC 2025| mọi quyền được bảo lưu
+    </span>
+    <span style="padding-right: 50px;">
+      Hiện tại web chỉ mới đang phát triển nên sẽ có 1 số lỗi không mong muốn.Đôi khi css của web sẽ bị mất. Nếu các bạn muốn làm web thì có thể liên hệ mình qua website: 
+      <a href="https://aikhanh.onrender.com" target="_blank" style="color: #000; text-decoration: underline;">https://aikhanh.onrender.com</a>
+       © KHANHPC 2025| mọi quyền được bảo lưu
+    </span>
+    <span style="padding-right: 50px;">
+      Hiện tại web chỉ mới đang phát triển nên sẽ có 1 số lỗi không mong muốn.Đôi khi css của web sẽ bị mất. Nếu các bạn muốn làm web thì có thể liên hệ mình qua website: 
+      <a href="https://aikhanh.onrender.com" target="_blank" style="color: #000; text-decoration: underline;">https://aikhanh.onrender.com</a>
+       © KHANHPC 2025| mọi quyền được bảo lưu
+    </span>
+  </div>
+</div>
 <body>
   <h1>CHIA SẺ FILE TỐC ĐỘ CAO KHANHPC</h1>
-
   <div id="create-group-div">
     <h3>Tạo nhóm mới (Chỉ dành cho giáo viên)</h3>
-    <input id="group-name" placeholder="Tên nhóm" autocomplete="off"/>
-    <input id="group-code" placeholder="Mã nhóm (tùy chỉnh)" autocomplete="off"/>
-    <input id="max-members" placeholder="Giới hạn thành viên" type="number" autocomplete="off"/>
-    <button id="create-group-btn">Tạo nhóm</button>
+    <input class="input" id="group-name" placeholder="Tên nhóm" autocomplete="off"/>
+    <input class="input" id="group-code" placeholder="Mã nhóm (tùy chỉnh)" autocomplete="off"/>
+    <input class="input" id="max-members" placeholder="Giới hạn thành viên" type="number" autocomplete="off"/>
+    <button class="button" id="create-group-btn">Tạo nhóm</button>
     <div id="create-group-msg"></div>
   </div>
-
   <hr />
-
   <div id="join-group-div">
     <h3>Tham gia nhóm</h3>
-    <input id="member-name" placeholder="STT+Tên thành viên" autocomplete="off"/>
-    <input id="join-group-code" placeholder="Mã nhóm (Do giáo viên cung cấp)" autocomplete="off"/>
-    <button id="join-group-btn">Tham gia</button>
+    <input class="input" id="member-name" placeholder="STT+Tên thành viên" autocomplete="off"/>
+    <input class="input" id="join-group-code" placeholder="Mã nhóm (Do giáo viên cung cấp)" autocomplete="off"/>
+    <button class="button" id="join-group-btn">Tham gia</button>
     <div id="join-group-msg"></div>
   </div>
-
   <hr />
-
   <div id="group-area" class="hidden">
     <h2>Nhóm: <span id="display-group-name"></span></h2>
     <h3>Thành viên (<span id="member-count"></span>)</h3>
     <ul id="members-list"></ul>
-
     <h3>Upload file</h3>
     <input type="file" id="file-input" />
-    <button id="upload-file-btn">Gửi file</button>
+    <button class="button" id="upload-file-btn">Gửi file</button>
     <div id="upload-msg"></div>
     <div id="upload-progress"></div>
-
     <h3>Nhật ký nhóm</h3>
     <ul id="log-list"></ul>
-
     <h3>File đã gửi</h3>
     <ul id="files-list"></ul>
-
-    <button id="leave-group-btn">Rời nhóm</button>
+    <button class="button" id="leave-group-btn">Rời nhóm</button>
   </div>
-
+<body>
+<div class="chat-container">
+  <button id="login-btn">Đăng nhập bằng Google</button>
+  <button id="logout-btn" style="display:none;">Đăng xuất</button>
+  <div id="pinned-message-container">
+    <button class="close-pin" title="Bỏ ghim">×</button>
+    <strong>Tin nhắn đã ghim:</strong>
+    <div id="pinned-message-content"></div>
+  </div>
+  <div id="messages" style="height: 657px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;"></div>
+  <div id="no-messages">💬 Hãy nhắn tin vào đây ngay</div>
+  <div id="notification-bar" style="
+    width: 100%;
+    background-color: #ffcc00;
+    color: #000;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    height: 40px;
+    line-height: 40px;
+    border-bottom: 2px solid #cc9900;
+    box-sizing: border-box;
+    position: relative;
+">
+  <div id="scrolling-wrapper" style="
+      display: inline-block;
+      white-space: nowrap;
+      will-change: transform;
+      animation: scroll-infinite 30s linear infinite;
+  ">
+    <span style="padding-right: 50px;">
+      Hiện tại web chỉ mới đang phát triển nên sẽ có 1 số lỗi không mong muốn.Đôi khi css của web sẽ bị mất. Nếu các bạn muốn làm web thì có thể liên hệ mình qua website: 
+      <a href="https://aikhanh.onrender.com" target="_blank" style="color: #000; text-decoration: underline;">https://aikhanh.onrender.com</a>
+       © KHANHPC 2025| mọi quyền được bảo lưu
+    </span>
+    <span style="padding-right: 50px;">
+      Hiện tại web chỉ mới đang phát triển nên sẽ có 1 số lỗi không mong muốn.Đôi khi css của web sẽ bị mất. Nếu các bạn muốn làm web thì có thể liên hệ mình qua website: 
+      <a href="https://aikhanh.onrender.com" target="_blank" style="color: #000; text-decoration: underline;">https://aikhanh.onrender.com</a>
+       © KHANHPC 2025| mọi quyền được bảo lưu
+    </span>
+    <span style="padding-right: 50px;">
+      Hiện tại web chỉ mới đang phát triển nên sẽ có 1 số lỗi không mong muốn.Đôi khi css của web sẽ bị mất. Nếu các bạn muốn làm web thì có thể liên hệ mình qua website: 
+      <a href="https://aikhanh.onrender.com" target="_blank" style="color: #000; text-decoration: underline;">https://aikhanh.onrender.com</a>
+       © KHANHPC 2025| mọi quyền được bảo lưu
+    </span>
+    <span style="padding-right: 50px;">
+      Hiện tại web chỉ mới đang phát triển nên sẽ có 1 số lỗi không mong muốn.Đôi khi css của web sẽ bị mất. Nếu các bạn muốn làm web thì có thể liên hệ mình qua website: 
+      <a href="https://aikhanh.onrender.com" target="_blank" style="color: #000; text-decoration: underline;">https://aikhanh.onrender.com</a>
+       © KHANHPC 2025| mọi quyền được bảo lưu
+    </span>
+  </div>
+</div>
+  <form id="input-form" style="display: flex;">
+    <div id="reply-info" style="display:none;"></div>
+    <input type="text" id="input" placeholder="Nhập tin nhắn..." required autocomplete="off" />
+    <button type="submit">Gửi</button>
+  </form>
+  <button id="scroll-to-bottom-btn" title="Kéo xuống cuối">⬇️</button>
+</div>
+<script>
+  const messagesContainer = document.getElementById("messages");
+  const scrollBtn = document.getElementById("scroll-to-bottom-btn");
+  function updateScrollButton() {
+    const distanceFromBottom = messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight;
+    scrollBtn.style.display = distanceFromBottom > 150 ? 'block' : 'none';
+  }
+  messagesContainer.addEventListener("scroll", updateScrollButton);
+  scrollBtn.addEventListener("click", () => {
+    messagesContainer.scrollTo({ top: messagesContainer.scrollHeight, behavior: 'smooth' });
+  });
+  // Khởi tạo trạng thái ban đầu
+  updateScrollButton();
+</script>
+<script>
+  const messages = document.getElementById('messages');
+  const input = document.getElementById('input');
+  function scrollToBottom() {
+    messages.scrollTop = messages.scrollHeight;
+  }
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (!text) return;
+    const newMsg = document.createElement('div');
+    newMsg.textContent = text;
+    messages.appendChild(newMsg);
+    input.value = '';
+    scrollToBottom();  // cuộn xuống tin nhắn mới
+  });
+</script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="client.js"></script>
-<footer style="
-  text-align: center;
-  padding: 18px 12px;
-  font-size: 17px;
-  font-weight: 700;
-  color: #004080;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #cce4ff;
-  border-top: 3px solid #1976d2;
-  box-shadow: 0 -2px 8px rgba(25, 118, 210, 0.3);
-  border-radius: 20px;
-  user-select: none;
-  letter-spacing: 0.05em;
-">
-  <span style="font-size: 20px; color: #0d47a1;">&#169;</span> 
-  <span>2025 <strong>Khánh - KHANHPC</strong></span> — 
-  <span style="font-style: italic; color: #0d47a1;">
-    Mọi quyền được bảo lưu. Không sao chép khi chưa được phép!
-  </span>
-</footer>
-
+  <footer style="
+    text-align: center;
+    padding: 18px 12px;
+    font-size: 17px;
+    font-weight: 700;
+    color: #004080;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #cce4ff;
+    border-top: 3px solid #1976d2;
+    box-shadow: 0 -2px 8px rgba(25, 118, 210, 0.3);
+    border-radius: 20px;
+    user-select: none;
+    letter-spacing: 0.05em;
+  ">
+    <span style="font-size: 20px; color: #0d47a1;">&#169;</span> 
+    <span>2025 <strong>Khánh - KHANHPC</strong></span> — 
+    <span style="font-style: italic; color: #0d47a1;">
+      Mọi quyền được bảo lưu. Không sao chép khi chưa được phép!
+    </span>
+  </footer>
+</head>
+<button id="toggleBtn" aria-label="Nhắn tin"
+  style="
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 999px;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    padding: 0 20px;
+    gap: 10px;
+  "
+  onmouseover="this.style.width='160px'; this.querySelector('span').style.opacity='1';"
+  onmouseout="this.style.width='60px'; this.querySelector('span').style.opacity='0';"
+>
+  <!-- Icon chat -->
+  <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" width="24" height="24">
+    <path d="M2 3h20v14H6l-4 4V3z"/>
+  </svg>
+  <span style="white-space: nowrap; opacity: 0; transition: opacity 0.3s ease;">Nhắn tin</span>
+</button>
+<script>
+  const form = document.getElementById('input-form');
+    // Làm mới ô nhập
+    input.value = "";
+</script>
+<script>
+const chat = document.querySelector('.chat-container');
+chat.style.display = 'none'; // Ẩn lúc đầu
+const btn = document.getElementById('toggleBtn');
+btn.addEventListener('click', () => {
+  if (chat.style.display === 'none') {
+    chat.style.display = 'block';
+  } else {
+    chat.style.display = 'none';
+  }
+});
+</script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+  import {
+    getAuth,
+    signInWithPopup,
+    GoogleAuthProvider,
+    onAuthStateChanged,
+    signOut
+  } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+  import {
+    getFirestore,
+    collection,
+    addDoc,
+    onSnapshot,
+    query,
+    orderBy,
+    serverTimestamp,
+    deleteDoc,
+    doc,
+    updateDoc,
+    getDoc
+  } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+  const app = initializeApp({
+    apiKey: "AIzaSyCRmdn4jSxw_ViPXV63ETKtmSBzNkrIKXg",
+    authDomain: "login-24d03.firebaseapp.com",
+    projectId: "login-24d03",
+    storageBucket: "login-24d03.appspot.com",
+    messagingSenderId: "680475305939",
+    appId: "1:680475305939:web:948991a862514b67a53126",
+    measurementId: "G-G3M993RQ3S"
+  });
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const messagesRef = collection(db, "messages");
+  let currentUser = null;
+  const messagesEl = document.getElementById("messages");
+  const loginBtn = document.getElementById("login-btn");
+  const logoutBtn = document.getElementById("logout-btn");
+  const inputForm = document.getElementById("input-form");
+  const input = document.getElementById("input");
+  const pinnedContainer = document.getElementById("pinned-message-container");
+  const pinnedContent = document.getElementById("pinned-message-content");
+  const closePinBtn = pinnedContainer.querySelector(".close-pin");
+  const replyInfo = document.getElementById("reply-info");
+  let replyToMessage = null; // lưu id tin nhắn đang reply
+  loginBtn.addEventListener("click", async () => {
+    const provider = new GoogleAuthProvider();
+    await signInWithPopup(auth, provider);
+  });
+  logoutBtn.addEventListener("click", () => {
+    signOut(auth);
+  });
+  onAuthStateChanged(auth, (user) => {
+    currentUser = user;
+    if (user) {
+      loginBtn.style.display = "none";
+      logoutBtn.style.display = "block";
+      inputForm.style.display = "flex";
+      listenMessages();
+    } else {
+      loginBtn.style.display = "block";
+      logoutBtn.style.display = "none";
+      inputForm.style.display = "none";
+      messagesEl.innerHTML = "";
+      pinnedContainer.style.display = "none";
+      replyInfo.style.display = "none";
+      replyToMessage = null;
+    }
+  });
+  function renderMessage(data, id) {
+    const msg = document.createElement("div");
+    msg.className = "message";
+    if (currentUser && data.uid === currentUser.uid) {
+      msg.classList.add("right");
+    }
+    const avatar = document.createElement("img");
+    avatar.src = data.photoURL || "";
+    avatar.className = "avatar";
+    const bubble = document.createElement("div");
+    bubble.className = "bubble";
+    const info = document.createElement("div");
+    info.className = "user-info";
+    info.textContent = data.displayName || "Ẩn danh";
+    // Nếu có tin nhắn trả lời
+    if(data.replyTo){
+      const quote = document.createElement("div");
+      quote.className = "reply-quote";
+      quote.textContent = "↪ " + (data.replyText || "Tin nhắn đã xóa");
+      // Click quote sẽ scroll tới tin nhắn được reply
+      quote.onclick = () => {
+        const repliedMsgEl = document.getElementById("msg-" + data.replyTo);
+        if (repliedMsgEl) {
+          repliedMsgEl.scrollIntoView({behavior:"smooth", block:"center"});
+          repliedMsgEl.classList.add("highlight");
+          setTimeout(() => repliedMsgEl.classList.remove("highlight"), 2000);
+        }
+      };
+      bubble.appendChild(quote);
+    }
+    bubble.appendChild(document.createTextNode(data.text));
+    msg.id = "msg-" + id;
+    msg.appendChild(avatar);
+    const contentDiv = document.createElement("div");
+    contentDiv.style.position = "relative";
+    contentDiv.appendChild(info);
+    contentDiv.appendChild(bubble);
+    msg.appendChild(contentDiv);
+    // Menu nút
+    const menuBtn = document.createElement("button");
+    menuBtn.className = "menu-btn";
+    menuBtn.textContent = "⋮";
+    // Tạo hộp menu
+    const menuOptions = document.createElement("div");
+    menuOptions.className = "menu-options";
+    // Ghim/Bỏ ghim
+    const isPinned = data.pinned === true;
+    const pinBtn = document.createElement("button");
+    pinBtn.textContent = isPinned ? "Bỏ ghim" : "Ghim";
+    pinBtn.onclick = async (e) => {
+      e.stopPropagation();
+      await updateDoc(doc(db, "messages", id), { pinned: !isPinned });
+    };
+    menuOptions.appendChild(pinBtn);
+    // Trả lời
+    const replyBtn = document.createElement("button");
+    replyBtn.textContent = "Trả lời";
+    replyBtn.onclick = (e) => {
+      e.stopPropagation();
+      replyToMessage = { id, text: data.text, displayName: data.displayName || "Ẩn danh" };
+      replyInfo.style.display = "inline-block";
+      replyInfo.textContent = `Trả lời ${replyToMessage.displayName}: ${replyToMessage.text.length > 50 ? replyToMessage.text.slice(0,47) + "..." : replyToMessage.text}`;
+      input.focus();
+    };
+    menuOptions.appendChild(replyBtn);
+    // Xóa tin nhắn (chỉ của user)
+    if (currentUser && currentUser.uid === data.uid) {
+      const delBtn = document.createElement("button");
+      delBtn.textContent = "Xóa";
+      delBtn.onclick = async (e) => {
+        e.stopPropagation();
+        if (confirm("Bạn có chắc muốn xóa tin nhắn này?")) {
+          await deleteDoc(doc(db, "messages", id));
+        }
+      };
+      menuOptions.appendChild(delBtn);
+    }
+    menuBtn.onclick = (e) => {
+      e.stopPropagation();
+      // Ẩn tất cả menu khác
+      document.querySelectorAll(".menu-options").forEach(m => {
+        if(m !== menuOptions) m.style.display = "none";
+      });
+      menuOptions.style.display = (menuOptions.style.display === "flex") ? "none" : "flex";
+    };
+    contentDiv.appendChild(menuBtn);
+    contentDiv.appendChild(menuOptions);
+    return msg;
+  }
+  async function listenMessages() {
+    const q = query(messagesRef, orderBy("createdAt"));
+    onSnapshot(q, async (snapshot) => {
+      messagesEl.innerHTML = "";
+      let pinnedMessage = null;
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        if (data.pinned === true) {
+          pinnedMessage = { id: docSnap.id, ...data };
+        }
+      });
+      // Hiển thị tin nhắn ghim
+      if (pinnedMessage) {
+        pinnedContainer.style.display = "block";
+        pinnedContent.textContent = pinnedMessage.text + ` (từ ${pinnedMessage.displayName || "Ẩn danh"})`;
+        pinnedContainer.dataset.id = pinnedMessage.id;
+      } else {
+        pinnedContainer.style.display = "none";
+        pinnedContent.textContent = "";
+        pinnedContainer.dataset.id = "";
+      }
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        // Để hiện replyText, ta cần lấy nội dung tin nhắn được reply
+        // Thêm trường replyText nếu có replyTo
+        if(data.replyTo){
+          // Lấy nội dung tin nhắn reply
+          const repliedDoc = snapshot.docs.find(d => d.id === data.replyTo);
+          if (repliedDoc) {
+            data.replyText = repliedDoc.data().text || "Tin nhắn đã xóa";
+          } else {
+            data.replyText = "Tin nhắn đã xóa";
+          }
+        }
+        const msgEl = renderMessage(data, docSnap.id);
+        messagesEl.appendChild(msgEl);
+      });
+      // Scroll xuống dưới cùng
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    });
+  }
+  inputForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!input.value.trim()) return;
+    const messageData = {
+      text: input.value.trim(),
+      uid: currentUser.uid,
+      displayName: currentUser.displayName,
+      photoURL: currentUser.photoURL,
+      createdAt: serverTimestamp()
+    };
+    if (replyToMessage) {
+      messageData.replyTo = replyToMessage.id;
+    }
+    await addDoc(messagesRef, messageData);
+    input.value = "";
+    replyToMessage = null;
+    replyInfo.style.display = "none";
+  });
+  // Bỏ reply khi click vào reply info
+  replyInfo.onclick = () => {
+    replyToMessage = null;
+    replyInfo.style.display = "none";
+  };
+  // Bỏ ghim khi nhấn nút đóng ở phần ghim
+  closePinBtn.onclick = async () => {
+    const pinnedId = pinnedContainer.dataset.id;
+    if (pinnedId) {
+      await updateDoc(doc(db, "messages", pinnedId), { pinned: false });
+    }
+  };
+  // Ẩn menu khi click ngoài
+  document.body.onclick = () => {
+    document.querySelectorAll(".menu-options").forEach(m => m.style.display = "none");
+  };
+</script>
+</body>
 </body>
 </html>
